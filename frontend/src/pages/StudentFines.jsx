@@ -1,0 +1,2 @@
+import React,{useEffect,useState} from 'react'; import api from '../services/api';
+export default function StudentFines(){ const [fines,setFines]=useState([]); useEffect(()=>{ api.get('/student/fines').then(r=>setFines(r.data.fines)).catch(()=>{}); },[]); return (<div><h2>Your Fines</h2>{fines.map(f=>(<div key={f._id} className='card mb-2'>{f.reason} - {f.amount} - {f.status} - imposed by: {f.imposedBy?.name}</div>))}</div>); }

@@ -1,0 +1,2 @@
+import React, {useEffect, useState} from 'react'; import api from '../services/api'; import { Link } from 'react-router-dom';
+export default function StudentHistory(){ const [list,setList]=useState([]); useEffect(()=>{ api.get('/complaints/student/history').then(r=>setList(r.data.list)).catch(()=>{}); },[]); return (<div><h2>Your Complaints</h2>{list.map(c=>(<Link to={`/complaints/${c._id}`} key={c._id}><div className='card mb-2'><strong>{c.title}</strong><div>{c.category} - {c.status}</div><div>Raised: {new Date(c.createdAt).toLocaleString()}</div></div></Link>))}</div>); }

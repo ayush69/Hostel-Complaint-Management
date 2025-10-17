@@ -1,0 +1,1 @@
+Frontend: npm install && npm run dev (Vite). Set VITE_API_BASE if backend differs.

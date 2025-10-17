@@ -1,0 +1,67 @@
+# Root
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Node
+node_modules/
+**/node_modules/
+
+# Env files
+.env
+**/.env
+.env.*
+frontend/.env*
+backend/.env*
+
+# Build outputs
+frontend/dist/
+backend/dist/
+**/build/
+**/.cache/
+
+# Vite/React
+.vite/
+.vscode/
+.eslintcache
+
+# Coverage
+coverage/
+**/coverage/
+
+# Logs and pid
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# OS
+Icon?
+
+# Editor
+.idea/
+*.swp
+*.swo
+
+# Misc
+*.local
+.tmp/
+.tmp
+.cache/
+
+# npm/pnpm/yarn (keep lockfiles committed for reproducible builds)
+# package-lock.json
+# pnpm-lock.yaml
+# yarn.lock
+
+# Database dumps
+*.sql
+*.sqlite
+*.sqlite3
+
+# Temporary
+*.tmp
+*.temp
