@@ -8,7 +8,7 @@ const complaintSchema = new Schema({
   studentId:{type:Schema.Types.ObjectId, ref:'Student', default:null},
   studentName:String,
   roomNo:String,
-  status:{type:String, enum:['Pending','Assigned','InProgress','Completed'], default:'Pending'},
+  status:{type:String, enum:['Pending','Assigned','InProgress','Completed','Rejected'], default:'Pending'},
   assignedStaffId:{type:Schema.Types.ObjectId, ref:'Staff', default:null},
   raisedDate:{type:Date, default:Date.now},
   assignedDate:Date,

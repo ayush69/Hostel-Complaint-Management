@@ -6,7 +6,7 @@ const staffSchema = new Schema({
   password:{type:String, required:true},
   category:{type:String, enum:['Electrician','Plumber','Carpenter','Cleaner','Maintenance','Other'], default:'Other'},
   phoneNumber:String, address:String,
-  offDay:{type:String, enum:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']},
+  offDay:String,
   joinedDate:{type:Date, default:Date.now},
   averageRating:{type:Number, default:0},
   completedTasks:{type:Number, default:0},
