@@ -20,6 +20,7 @@ import AdminStaffEdit from './pages/AdminStaffEdit';
 import AdminStudentEdit from './pages/AdminStudentEdit';
 import AdminAssign from './pages/AdminAssign';
 import AdminComplaints from './pages/AdminComplaints';
+import AdminFines from './pages/AdminFines';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicOnlyRoute from './components/PublicOnlyRoute';
@@ -56,6 +57,7 @@ export default function App(){ return (<div><Navbar /><div className='p-4'><Rout
 		<Route path='/admin/dashboard' element={<AdminDashboard/>} />
 		<Route path='/admin/students' element={<AdminStudents/>} />
 		<Route path='/admin/students/:id/edit' element={<AdminStudentEdit/>} />
+		<Route path='/admin/fines' element={<AdminFines/>} />
 		<Route path='/admin/staff' element={<AdminStaff/>} />
 		<Route path='/admin/staff/create' element={<AdminStaffCreate/>} />
 		<Route path='/admin/staff/:id/edit' element={<AdminStaffEdit/>} />

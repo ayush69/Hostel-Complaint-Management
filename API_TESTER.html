@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Endpoint Tester</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status.online { background: #d4edda; color: #155724; }
+        .status.offline { background: #f8d7da; color: #721c24; }
+        .section {
+            margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .section-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .section-body {
+            padding: 20px;
+        }
+        .endpoint {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #666;
+        }
+        .endpoint.success { border-left-color: #28a745; background: #d4edda; }
+        .endpoint.error { border-left-color: #dc3545; background: #f8d7da; }
+        .endpoint.pending { border-left-color: #ffc107; background: #fff3cd; }
+        .method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 10px;
+            min-width: 50px;
+            text-align: center;
+        }
+        .method.get { background: #61affe; color: white; }
+        .method.post { background: #49cc90; color: white; }
+        .method.put { background: #fca130; color: white; }
+        .method.delete { background: #f93e3e; color: white; }
+        .path {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+        }
+        .result {
+            margin-left: 10px;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .result.pass { background: #28a745; color: white; }
+        .result.fail { background: #dc3545; color: white; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        .log div {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .log .success { color: #4ec9b0; }
+        .log .error { color: #f48771; }
+        .log .warn { color: #dcdcaa; }
+        .log .info { color: #9cdcfe; }
+        input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .token-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        .token-info.no-token {
+            background: #fff3cd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 HCM API Endpoint Tester</h1>
+        <p class="subtitle">Test all backend endpoints to verify they're working correctly</p>
+
+        <!-- Server Status -->
+        <div class="section">
+            <div class="section-header">
+                🌐 Server Status
+                <span id="serverStatus" class="status offline">Checking...</span>
+            </div>
+            <div class="section-body">
+                <button onclick="checkServer()">Check Backend Server</button>
+                <button onclick="checkFrontend()">Check Frontend Server</button>
+                <div id="serverLog" class="log" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Authentication -->
+        <div class="section">
+            <div class="section-header">🔐 Authentication</div>
+            <div class="section-body">
+                <div id="tokenInfo" class="token-info no-token">
+                    ⚠️ No authentication token found. Please login first.
+                </div>
+                
+                <h4 style="margin-bottom: 10px;">Test Login:</h4>
+                <input type="email" id="loginEmail" placeholder="Email" value="test@student.com">
+                <input type="password" id="loginPassword" placeholder="Password" value="password123">
+                <button onclick="testStudentLogin()">Login as Student</button>
+                <button onclick="testStaffLogin()">Login as Staff</button>
+                <button onclick="testAdminLogin()">Login as Admin</button>
+                <button onclick="clearToken()">Clear Token</button>
+                
+                <div id="authLog" class="log" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Student Endpoints -->
+        <div class="section">
+            <div class="section-header">👨‍🎓 Student Endpoints</div>
+            <div class="section-body">
+                <button onclick="testEndpoint('GET', '/student/dashboard')">GET /student/dashboard</button>
+                <button onclick="testEndpoint('GET', '/student/fines')">GET /student/fines</button>
+                <button onclick="testEndpoint('POST', '/complaints/raise', {title:'Test', description:'Test desc', category:'Electrician', roomNo:'101'})">POST /complaints/raise</button>
+                <button onclick="testEndpoint('GET', '/complaints/student/history')">GET /complaints/student/history</button>
+                <div id="studentLog" class="log" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Staff Endpoints -->
+        <div class="section">
+            <div class="section-header">👷 Staff Endpoints</div>
+            <div class="section-body">
+                <button onclick="testEndpoint('GET', '/staff/assigned-complaints')">GET /staff/assigned-complaints</button>
+                <div id="staffLog" class="log" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Admin Endpoints -->
+        <div class="section">
+            <div class="section-header">👨‍💼 Admin Endpoints</div>
+            <div class="section-body">
+                <button onclick="testEndpoint('GET', '/admin/dashboard')">GET /admin/dashboard</button>
+                <button onclick="testEndpoint('GET', '/admin/complaints/pending')">GET /admin/complaints/pending</button>
+                <button onclick="testEndpoint('GET', '/admin/students')">GET /admin/students</button>
+                <button onclick="testEndpoint('GET', '/admin/staff')">GET /admin/staff</button>
+                <button onclick="testEndpoint('GET', '/admin/complaints')">GET /admin/complaints</button>
+                <div id="adminLog" class="log" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Run All Tests -->
+        <div class="section">
+            <div class="section-header">🧪 Comprehensive Test</div>
+            <div class="section-body">
+                <button onclick="runAllTests()" style="background: #28a745;">Run All Endpoint Tests</button>
+                <div id="allTestsLog" class="log" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        
+        function log(elementId, message, type = 'info') {
+            const logEl = document.getElementById(elementId);
+            logEl.style.display = 'block';
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logEl.appendChild(div);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function updateTokenInfo() {
+            const token = localStorage.getItem('hcm_token');
+            const tokenInfo = document.getElementById('tokenInfo');
+            
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const exp = new Date(payload.exp * 1000);
+                    const now = new Date();
+                    const isExpired = exp < now;
+                    
+                    tokenInfo.className = isExpired ? 'token-info no-token' : 'token-info';
+                    tokenInfo.innerHTML = `
+                        ✅ Token found<br>
+                        Role: <strong>${payload.role}</strong><br>
+                        User ID: ${payload.id}<br>
+                        Expires: ${exp.toLocaleString()} ${isExpired ? '(EXPIRED ❌)' : '(Valid ✅)'}
+                    `;
+                } catch (e) {
+                    tokenInfo.className = 'token-info no-token';
+                    tokenInfo.innerHTML = '⚠️ Invalid token format';
+                }
+            } else {
+                tokenInfo.className = 'token-info no-token';
+                tokenInfo.innerHTML = '⚠️ No authentication token found. Please login first.';
+            }
+        }
+
+        async function checkServer() {
+            log('serverLog', 'Checking backend server...', 'info');
+            try {
+                const response = await fetch('http://localhost:5000/');
+                const data = await response.json();
+                log('serverLog', '✅ Backend server is ONLINE', 'success');
+                log('serverLog', JSON.stringify(data, null, 2), 'info');
+                document.getElementById('serverStatus').textContent = 'Online';
+                document.getElementById('serverStatus').className = 'status online';
+            } catch (error) {
+                log('serverLog', '❌ Backend server is OFFLINE or unreachable', 'error');
+                log('serverLog', error.message, 'error');
+                document.getElementById('serverStatus').textContent = 'Offline';
+                document.getElementById('serverStatus').className = 'status offline';
+            }
+        }
+
+        async function checkFrontend() {
+            log('serverLog', 'Checking frontend server...', 'info');
+            log('serverLog', '✅ Frontend is running (you\'re viewing this page)', 'success');
+        }
+
+        async function testEndpoint(method, path, body = null) {
+            const logId = path.startsWith('/student') ? 'studentLog' : 
+                          path.startsWith('/staff') ? 'staffLog' : 
+                          path.startsWith('/admin') ? 'adminLog' : 'allTestsLog';
+            
+            log(logId, `Testing ${method} ${path}...`, 'info');
+            
+            const token = localStorage.getItem('hcm_token');
+            if (!token) {
+                log(logId, '⚠️  No token found - request will fail', 'warn');
+            }
+
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+
+                if (token) {
+                    options.headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(API_BASE + path, options);
+                const data = await response.json();
+
+                if (response.ok) {
+                    log(logId, `✅ ${method} ${path} - Status: ${response.status}`, 'success');
+                    log(logId, JSON.stringify(data, null, 2), 'info');
+                } else {
+                    log(logId, `❌ ${method} ${path} - Status: ${response.status}`, 'error');
+                    log(logId, JSON.stringify(data, null, 2), 'error');
+                }
+            } catch (error) {
+                log(logId, `❌ ${method} ${path} - Network Error`, 'error');
+                log(logId, error.message, 'error');
+            }
+        }
+
+        async function testStudentLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            log('authLog', 'Attempting student login...', 'info');
+            
+            try {
+                const response = await fetch(API_BASE + '/auth/student/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.token) {
+                    localStorage.setItem('hcm_token', data.token);
+                    log('authLog', '✅ Login successful! Token saved.', 'success');
+                    log('authLog', `User: ${data.user.name} (${data.user.email})`, 'success');
+                    updateTokenInfo();
+                } else {
+                    log('authLog', '❌ Login failed: ' + (data.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                log('authLog', '❌ Login error: ' + error.message, 'error');
+            }
+        }
+
+        async function testStaffLogin() {
+            log('authLog', 'Use /auth/staff/login endpoint with staff credentials', 'info');
+        }
+
+        async function testAdminLogin() {
+            log('authLog', 'Use /auth/admin/login endpoint with admin credentials', 'info');
+        }
+
+        function clearToken() {
+            localStorage.removeItem('hcm_token');
+            log('authLog', '🗑️  Token cleared from localStorage', 'warn');
+            updateTokenInfo();
+        }
+
+        async function runAllTests() {
+            log('allTestsLog', '🧪 Starting comprehensive endpoint test...', 'info');
+            log('allTestsLog', '='.repeat(50), 'info');
+            
+            await checkServer();
+            
+            const token = localStorage.getItem('hcm_token');
+            if (!token) {
+                log('allTestsLog', '⚠️  WARNING: No token found. Most tests will fail.', 'warn');
+                log('allTestsLog', 'Please login first using the Authentication section above.', 'warn');
+                return;
+            }
+
+            // Test all endpoints
+            const endpoints = [
+                { method: 'GET', path: '/student/dashboard' },
+                { method: 'GET', path: '/student/fines' },
+                { method: 'GET', path: '/complaints/student/history' },
+                { method: 'GET', path: '/staff/assigned-complaints' },
+                { method: 'GET', path: '/admin/dashboard' },
+                { method: 'GET', path: '/admin/complaints/pending' },
+                { method: 'GET', path: '/admin/students' },
+                { method: 'GET', path: '/admin/staff' },
+                { method: 'GET', path: '/admin/complaints' },
+            ];
+
+            for (const endpoint of endpoints) {
+                await testEndpoint(endpoint.method, endpoint.path);
+                await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms between requests
+            }
+
+            log('allTestsLog', '='.repeat(50), 'info');
+            log('allTestsLog', '✅ All tests completed!', 'success');
+        }
+
+        // Initialize
+        updateTokenInfo();
+        checkServer();
+    </script>
+</body>
+</html>

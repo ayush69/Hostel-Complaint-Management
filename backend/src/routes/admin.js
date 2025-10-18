@@ -6,6 +6,34 @@ const Student = require('../models/Student');
 const Fine = require('../models/Fine');
 const { authenticate } = require('../middleware/auth');
 const router = express.Router();
+
+// Admin Dashboard Stats
+router.get('/dashboard', authenticate, async (req,res)=>{
+  if (!req.user || req.user.role !== 'admin') return res.status(403).json({message:'Admin only'});
+  try {
+    const pendingComplaints = await Complaint.countDocuments({ status: 'Pending' });
+    const totalComplaints = await Complaint.countDocuments({});
+    const totalStudents = await Student.countDocuments({});
+    const totalStaff = await Staff.countDocuments({ deleted: { $ne: true } });
+    const assignedComplaints = await Complaint.countDocuments({ status: 'Assigned' });
+    const inProgressComplaints = await Complaint.countDocuments({ status: 'InProgress' });
+    const completedComplaints = await Complaint.countDocuments({ status: 'Completed' });
+    
+    res.json({ 
+      pendingComplaints,
+      totalComplaints,
+      totalStudents,
+      totalStaff,
+      assignedComplaints,
+      inProgressComplaints,
+      completedComplaints
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message:'Server error'});
+  }
+});
+
 router.get('/complaints/pending', authenticate, async (req,res)=>{
   if (!req.user || req.user.role !== 'admin') return res.status(403).json({message:'Admin only'});
   const list = await Complaint.find({ status: 'Pending' }).populate('studentId', 'name rollNo roomNo').sort({createdAt:-1});
@@ -26,13 +54,54 @@ router.put('/complaints/:id/assign', authenticate, body('staffId').notEmpty(), a
   await complaint.save();
   res.json({ complaint });
 });
+
+// Reject complaint endpoint
+router.put('/complaints/:id/reject', authenticate, async (req,res)=>{
+  if (!req.user || req.user.role !== 'admin') return res.status(403).json({message:'Admin only'});
+  try {
+    const complaint = await Complaint.findById(req.params.id);
+    if (!complaint) return res.status(404).json({message:'Complaint not found'});
+    complaint.status = 'Rejected';
+    await complaint.save();
+    res.json({ complaint });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message:'Server error'});
+  }
+});
+
 router.get('/students', authenticate, async (req,res)=>{
   if (!req.user || req.user.role !== 'admin') return res.status(403).json({message:'Admin only'});
-  const page = parseInt(req.query.page||'1'); const per = parseInt(req.query.per||'20'); const q = req.query.q || '';
-  const filter = q ? { $or: [{ name: new RegExp(q,'i') }, { rollNo: new RegExp(q,'i') }] } : {};
-  const total = await Student.countDocuments(filter);
-  const list = await Student.find(filter).skip((page-1)*per).limit(per).sort({createdAt:-1});
-  res.json({ list, total, page, per });
+  try {
+    const page = parseInt(req.query.page||'1'); const per = parseInt(req.query.per||'20'); const q = req.query.q || '';
+    const filter = q ? { $or: [{ name: new RegExp(q,'i') }, { rollNo: new RegExp(q,'i') }] } : {};
+    const total = await Student.countDocuments(filter);
+    const students = await Student.find(filter).skip((page-1)*per).limit(per).sort({createdAt:-1});
+    
+    // Get fine information for each student
+    const list = await Promise.all(students.map(async (student) => {
+      const fines = await Fine.find({ studentId: student._id });
+      const totalFines = fines.length;
+      const unpaidFines = fines.filter(f => f.status === 'Unpaid').length;
+      const totalUnpaid = fines.filter(f => f.status === 'Unpaid').reduce((sum, f) => sum + f.amount, 0);
+      const totalPaid = fines.filter(f => f.status === 'Paid').reduce((sum, f) => sum + f.amount, 0);
+      
+      return {
+        ...student.toObject(),
+        fineStats: {
+          totalFines,
+          unpaidFines,
+          totalUnpaid,
+          totalPaid
+        }
+      };
+    }));
+    
+    res.json({ list, total, page, per });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message:'Server error'});
+  }
 });
 // get one student
 router.get('/students/:id', authenticate, async (req,res)=>{
@@ -72,14 +141,105 @@ router.put('/students/:id', authenticate,
     res.json({ student: s });
   }
 );
-router.post('/fines/impose', authenticate, body('studentId').notEmpty(), body('amount').isNumeric(), async (req,res)=>{
+router.post('/fines/impose', authenticate, 
+  body('studentId').notEmpty(), 
+  body('amount').isNumeric().custom(value => {
+    if (parseFloat(value) <= 0) {
+      throw new Error('Fine amount must be greater than zero');
+    }
+    return true;
+  }), 
+  async (req,res)=>{
+    if (!req.user || req.user.role !== 'admin') return res.status(403).json({message:'Admin only'});
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({errors: errors.array()});
+    
+    try {
+      const { studentId, amount, reason } = req.body;
+      const student = await Student.findById(studentId);
+      if (!student) return res.status(404).json({message:'Student not found'});
+      
+      const fine = await Fine.create({ 
+        studentId: student._id, 
+        amount: parseFloat(amount), 
+        reason, 
+        imposedBy: req.user.id 
+      });
+      
+      student.currentFines.push(fine._id); 
+      await student.save();
+      res.json({ fine });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({message:'Server error'});
+    }
+});
+
+// Get all fines for a student
+router.get('/students/:id/fines', authenticate, async (req,res)=>{
   if (!req.user || req.user.role !== 'admin') return res.status(403).json({message:'Admin only'});
-  const { studentId, amount, reason } = req.body;
-  const student = await Student.findById(studentId);
-  if (!student) return res.status(404).json({message:'Student not found'});
-  const fine = await Fine.create({ studentId: student._id, amount, reason, imposedBy: req.user.id });
-  student.currentFines.push(fine._id); await student.save();
-  res.json({ fine });
+  try {
+    const fines = await Fine.find({ studentId: req.params.id })
+      .populate('imposedBy', 'name')
+      .sort({createdAt: -1});
+    res.json({ fines });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message:'Server error'});
+  }
+});
+
+// Reduce fine amount
+router.put('/fines/:id/reduce', authenticate,
+  body('newAmount').isNumeric().custom(value => {
+    if (parseFloat(value) <= 0) {
+      throw new Error('Fine amount must be greater than zero');
+    }
+    return true;
+  }),
+  async (req,res)=>{
+    if (!req.user || req.user.role !== 'admin') return res.status(403).json({message:'Admin only'});
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({errors: errors.array()});
+    
+    try {
+      const { newAmount } = req.body;
+      const fine = await Fine.findById(req.params.id);
+      if (!fine) return res.status(404).json({message:'Fine not found'});
+      
+      if (parseFloat(newAmount) >= fine.amount) {
+        return res.status(400).json({message:'New amount must be less than current amount'});
+      }
+      
+      fine.amount = parseFloat(newAmount);
+      await fine.save();
+      res.json({ fine });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({message:'Server error'});
+    }
+});
+
+// Delete fine
+router.delete('/fines/:id', authenticate, async (req,res)=>{
+  if (!req.user || req.user.role !== 'admin') return res.status(403).json({message:'Admin only'});
+  try {
+    const fine = await Fine.findById(req.params.id);
+    if (!fine) return res.status(404).json({message:'Fine not found'});
+    
+    // Remove fine from student's currentFines array
+    await Student.updateOne(
+      { _id: fine.studentId },
+      { $pull: { currentFines: fine._id } }
+    );
+    
+    // Delete the fine
+    await Fine.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Fine deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message:'Server error'});
+  }
 });
 // complaints history for admin
 router.get('/complaints', authenticate, async (req,res)=>{
