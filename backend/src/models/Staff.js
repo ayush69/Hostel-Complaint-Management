@@ -1,5 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+
 const Schema = mongoose.Schema;
+
 const staffSchema = new Schema({
   name:{type:String, required:true},
   email:{type:String, required:true, unique:true},
@@ -12,4 +14,5 @@ const staffSchema = new Schema({
   completedTasks:{type:Number, default:0},
   deleted:{type:Boolean, default:false}
 }, {timestamps:true});
-module.exports = mongoose.model('Staff', staffSchema);
+
+export default mongoose.model('Staff', staffSchema);

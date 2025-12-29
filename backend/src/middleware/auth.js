@@ -1,6 +1,6 @@
-const { verifyToken } = require('../utils/jwt');
+import { verifyToken } from '../utils/jwt.js';
 
-exports.authenticate = (req,res,next)=>{
+export const authenticate = (req,res,next)=>{
 	const auth = req.headers.authorization;
 	if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({message:'No token'});
 	const token = auth.split(' ')[1];
@@ -12,7 +12,7 @@ exports.authenticate = (req,res,next)=>{
 	}
 };
 
-exports.requireRole = (role) => (req,res,next)=>{
+export const requireRole = (role) => (req,res,next)=>{
 	if (req.user && req.user.role === role) return next();
 	return res.status(403).json({message:'Forbidden - role required: '+role});
 };

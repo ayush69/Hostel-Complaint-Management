@@ -1,10 +1,11 @@
-const express = require('express');
-const { body, validationResult } = require('express-validator');
-const Complaint = require('../models/Complaint');
-const Staff = require('../models/Staff');
-const Student = require('../models/Student');
-const Fine = require('../models/Fine');
-const { authenticate } = require('../middleware/auth');
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import Complaint from '../models/Complaint.js';
+import Staff from '../models/Staff.js';
+import Student from '../models/Student.js';
+import Fine from '../models/Fine.js';
+import { authenticate } from '../middleware/auth.js';
+
 const router = express.Router();
 
 // Admin Dashboard Stats
@@ -309,4 +310,5 @@ router.put('/staff/:id', authenticate,
     res.json({ staff: st });
   }
 );
-module.exports = router;
+
+export default router;

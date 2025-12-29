@@ -1,11 +1,13 @@
-const express = require('express');
-const { body, validationResult } = require('express-validator');
-const Staff = require('../models/Staff');
-const Admin = require('../models/Admin');
-const { comparePassword, hashPassword } = require('../utils/hash');
-const { generateToken } = require('../utils/jwt');
-const { authenticate } = require('../middleware/auth');
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import Staff from '../models/Staff.js';
+import Admin from '../models/Admin.js';
+import { comparePassword, hashPassword } from '../utils/hash.js';
+import { generateToken } from '../utils/jwt.js';
+import { authenticate } from '../middleware/auth.js';
+
 const router = express.Router();
+
 router.post('/staff/login', body('email').isEmail(), body('password').isLength({min:6}), async (req,res)=>{
   const errors = validationResult(req); if (!errors.isEmpty()) return res.status(400).json({errors: errors.array()});
   const { email,password } = req.body;
@@ -16,6 +18,7 @@ router.post('/staff/login', body('email').isEmail(), body('password').isLength({
   const token = generateToken({ id: staff._id, role: 'staff', name: staff.name });
   res.json({ token, user: { id: staff._id, name: staff.name, category: staff.category } });
 });
+
 router.post('/admin/login', body('email').isEmail(), body('password').isLength({min:6}), async (req,res)=>{
   const errors = validationResult(req); if (!errors.isEmpty()) return res.status(400).json({errors: errors.array()});
   const { email,password } = req.body;
@@ -26,6 +29,7 @@ router.post('/admin/login', body('email').isEmail(), body('password').isLength({
   const token = generateToken({ id: admin._id, role: 'admin', name: admin.name });
   res.json({ token, user: { id: admin._id, name: admin.name, role: admin.role } });
 });
+
 // create staff
 router.post('/admin/create-staff', authenticate, body('name').isLength({min:2}), body('email').isEmail(), body('password').isLength({min:6}), async (req,res)=>{
   if (!req.user || req.user.role !== 'admin') return res.status(403).json({message:'Admin only'});
@@ -36,4 +40,5 @@ router.post('/admin/create-staff', authenticate, body('name').isLength({min:2}),
   const s = await Staff.create({ name,email,password:hashed,category,phoneNumber,address,offDay });
   res.json({ staff: s });
 });
-module.exports = router;
+
+export default router;

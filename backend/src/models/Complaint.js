@@ -1,5 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+
 const Schema = mongoose.Schema;
+
 const complaintSchema = new Schema({
   title:{type:String, required:true},
   description:String,
@@ -16,5 +18,7 @@ const complaintSchema = new Schema({
   rating:{type:Number, min:1, max:5},
   feedback:String
 }, {timestamps:true});
+
 complaintSchema.index({ status:1, category:1 });
-module.exports = mongoose.model('Complaint', complaintSchema);
+
+export default mongoose.model('Complaint', complaintSchema);

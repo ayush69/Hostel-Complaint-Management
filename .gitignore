@@ -48,6 +48,15 @@ Icon?
 
 # Misc
 *.local
+
+# Debugging and troubleshooting files
+API_DEBUG_SUMMARY.md
+API_TESTER.html
+check-api.ps1
+FIX_PAGES_NOT_LOADING.md
+TROUBLESHOOTING_API.md
+ES_MODULE_MIGRATION.md
+backend/ES_MODULE_MIGRATION.md
 .tmp/
 .tmp
 .cache/

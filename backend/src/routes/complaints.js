@@ -1,8 +1,10 @@
-const express = require('express');
-const { body, validationResult } = require('express-validator');
-const Complaint = require('../models/Complaint');
-const { authenticate } = require('../middleware/auth');
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import Complaint from '../models/Complaint.js';
+import { authenticate } from '../middleware/auth.js';
+
 const router = express.Router();
+
 router.post('/raise', authenticate,
   body('title').isLength({min:3}),
   body('category').isIn(['Electrician','Plumber','Carpenter','Cleaner','Maintenance','Other']),
@@ -20,6 +22,7 @@ router.post('/raise', authenticate,
     }
   }
 );
+
 router.get('/student/history', authenticate, async (req,res)=>{
   if (!req.user || req.user.role !== 'student') return res.status(403).json({message:'Student only'});
   try {
@@ -30,6 +33,7 @@ router.get('/student/history', authenticate, async (req,res)=>{
     res.status(500).json({message:'Server error'});
   }
 });
+
 router.get('/:id/details', authenticate, async (req,res)=>{
   try {
     const c = await Complaint.findById(req.params.id).populate('assignedStaffId','name category phoneNumber');
@@ -40,6 +44,7 @@ router.get('/:id/details', authenticate, async (req,res)=>{
     res.status(500).json({message:'Server error'});
   }
 });
+
 router.put('/:id/rate', authenticate, body('rating').isInt({min:1,max:5}), async (req,res)=>{
   if (!req.user || req.user.role !== 'student') return res.status(403).json({message:'Student only'});
   const errors = validationResult(req);
@@ -59,4 +64,5 @@ router.put('/:id/rate', authenticate, body('rating').isInt({min:1,max:5}), async
     res.status(500).json({message:'Server error'});
   }
 });
-module.exports = router;
+
+export default router;

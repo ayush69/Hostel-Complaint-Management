@@ -1,5 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+
 const Schema = mongoose.Schema;
+
 const fineSchema = new Schema({
   studentId:{type:Schema.Types.ObjectId, ref:'Student', required:true},
   amount:{type:Number, required:true},
@@ -8,4 +10,5 @@ const fineSchema = new Schema({
   status:{type:String, enum:['Paid','Unpaid'], default:'Unpaid'},
   imposedBy:{type:Schema.Types.ObjectId, ref:'Admin'}
 }, {timestamps:true});
-module.exports = mongoose.model('Fine', fineSchema);
+
+export default mongoose.model('Fine', fineSchema);
