@@ -1,5 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+
 const Schema = mongoose.Schema;
+
 const studentSchema = new Schema({
   name: {type:String, required:true},
   email: {type:String, required:true, unique:true, index:true},
@@ -9,4 +11,5 @@ const studentSchema = new Schema({
   currentFines:[{type:Schema.Types.ObjectId, ref:'Fine'}],
   registeredDate:{type:Date, default:Date.now}
 }, {timestamps:true});
-module.exports = mongoose.model('Student', studentSchema);
+
+export default mongoose.model('Student', studentSchema);

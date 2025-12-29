@@ -1,9 +1,11 @@
-const express = require('express');
-const { body, validationResult } = require('express-validator');
-const Student = require('../models/Student');
-const { hashPassword, comparePassword } = require('../utils/hash');
-const { generateToken } = require('../utils/jwt');
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import Student from '../models/Student.js';
+import { hashPassword, comparePassword } from '../utils/hash.js';
+import { generateToken } from '../utils/jwt.js';
+
 const router = express.Router();
+
 router.post('/register',
   body('name').isLength({min:2}),
   body('email').isEmail(),
@@ -22,6 +24,7 @@ router.post('/register',
     } catch (err) { console.error(err); res.status(500).json({message:'Server error'}); }
   }
 );
+
 router.post('/login', body('email').isEmail(), body('password').isLength({min:6}), async (req,res)=>{
   const errors = validationResult(req); if (!errors.isEmpty()) return res.status(400).json({errors: errors.array()});
   try {
@@ -34,4 +37,5 @@ router.post('/login', body('email').isEmail(), body('password').isLength({min:6}
     res.json({ token, user: { id: student._id, name: student.name, email: student.email } });
   } catch (err) { console.error(err); res.status(500).json({message:'Server error'}); }
 });
-module.exports = router;
+
+export default router;

@@ -1,8 +1,10 @@
-const express = require('express');
-const { authenticate } = require('../middleware/auth');
-const Complaint = require('../models/Complaint');
-const Fine = require('../models/Fine');
+import express from 'express';
+import { authenticate } from '../middleware/auth.js';
+import Complaint from '../models/Complaint.js';
+import Fine from '../models/Fine.js';
+
 const router = express.Router();
+
 router.get('/dashboard', authenticate, async (req,res)=>{
   if (!req.user || req.user.role !== 'student') return res.status(403).json({message:'Student only'});
   try {
@@ -18,6 +20,7 @@ router.get('/dashboard', authenticate, async (req,res)=>{
     res.status(500).json({message:'Server error'});
   }
 });
+
 router.get('/fines', authenticate, async (req,res)=>{
   if (!req.user || req.user.role !== 'student') return res.status(403).json({message:'Student only'});
   try {
@@ -28,4 +31,5 @@ router.get('/fines', authenticate, async (req,res)=>{
     res.status(500).json({message:'Server error'});
   }
 });
-module.exports = router;
+
+export default router;

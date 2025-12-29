@@ -1,5 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+
 const Schema = mongoose.Schema;
+
 const adminSchema = new Schema({
   name:{type:String, required:true},
   email:{type:String, required:true, unique:true},
@@ -7,4 +9,5 @@ const adminSchema = new Schema({
   role:{type:String, enum:['Warden','Caretaker'], default:'Warden'},
   phoneNumber:String
 }, {timestamps:true});
-module.exports = mongoose.model('Admin', adminSchema);
+
+export default mongoose.model('Admin', adminSchema);
