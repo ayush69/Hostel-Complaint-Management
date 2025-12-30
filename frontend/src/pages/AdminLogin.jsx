@@ -1,7 +1,8 @@
-import React, { useState } from 'react'; import api from '../services/api'; import { setToken, getToken, clearToken } from '../utils/auth'; import { Link } from 'react-router-dom'; import toast from 'react-hot-toast';
+import React, { useState } from 'react'; import api from '../services/api'; import { setToken, getToken, clearToken } from '../utils/auth'; import { Link, useNavigate } from 'react-router-dom'; import toast from 'react-hot-toast';
 export default function AdminLogin() {
   const [form, setForm] = useState({ email: '', password: '' }); const token = getToken();
-  const submit = async (e) => { e.preventDefault(); try { const res = await api.post('/auth/admin/login', form); setToken(res.data.token); window.location.href = '/admin/pending'; } catch (err) { toast.error(err?.response?.data?.message || 'Login failed'); } };
+  const nav = useNavigate();
+  const submit = async (e) => { e.preventDefault(); try { const res = await api.post('/auth/admin/login', form); setToken(res.data.token); toast.success('Login successful!'); nav('/admin/dashboard'); } catch (err) { toast.error(err?.response?.data?.message || 'Login failed'); } };
   const switchAccount = ()=>{ clearToken(); };
   return (
     <div className='max-w-md mx-auto'>
