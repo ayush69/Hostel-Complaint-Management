@@ -1,6 +1,7 @@
 import React from 'react';
 import api from '../services/api';
 import { setToken } from '../utils/auth';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -15,6 +16,7 @@ const schema = z.object({
 });
 
 export default function StaffLogin() {
+  const nav = useNavigate();
   const {
     register,
     handleSubmit,
@@ -26,7 +28,7 @@ export default function StaffLogin() {
       const res = await api.post('/auth/staff/login', data);
       setToken(res.data.token);
       toast.success('Welcome back!');
-      window.location.href = '/staff/dashboard';
+      nav('/staff/dashboard');
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Login failed');
     }
