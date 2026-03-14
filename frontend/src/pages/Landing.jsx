@@ -85,6 +85,9 @@ export default function Landing() {
               <Link to='/staff/login'>
                 <Button variant='secondary'>Staff Login</Button>
               </Link>
+              <Link to='/vendor/login'>
+                <Button variant='secondary'>Vendor Login</Button>
+              </Link>
               <Link to='/admin/login'>
                 <Button variant='ghost'>Admin Login</Button>
               </Link>

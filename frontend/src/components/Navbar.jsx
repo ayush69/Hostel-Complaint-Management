@@ -12,7 +12,7 @@ export default function Navbar(){
   const switchAccount = () => { clearToken(); /* stay on the same page to login again */ };
 
   // role-based home link
-  const homeHref = role === 'admin' ? '/admin/dashboard' : role === 'staff' ? '/staff/dashboard' : role === 'student' ? '/student/dashboard' : '/';
+  const homeHref = role === 'admin' ? '/admin/dashboard' : role === 'staff' ? '/staff/dashboard' : role === 'student' ? '/student/dashboard' : role === 'vendor' ? '/vendor/dashboard' : '/';
 
   return (
     <nav className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg sticky top-0 z-50 border-b border-blue-800">
@@ -34,6 +34,7 @@ export default function Navbar(){
                   <Link to='/student/register' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Register</Link>
                   <Link to='/staff/login' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Staff</Link>
                   <Link to='/admin/login' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Admin</Link>
+                  <Link to='/vendor/login' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Vendor</Link>
                 </>
               )}
               {role === 'student' && (
@@ -42,6 +43,7 @@ export default function Navbar(){
                   <Link to='/student/raise' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Raise Complaint</Link>
                   <Link to='/student/history' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>History</Link>
                   <Link to='/student/fines' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Fines</Link>
+                  <Link to='/student/tiffin' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Tiffin</Link>
                 </>
               )}
               {role === 'staff' && (
@@ -56,6 +58,14 @@ export default function Navbar(){
                   <Link to='/admin/students' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Students</Link>
                   <Link to='/admin/fines' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Manage Fines</Link>
                   <Link to='/admin/staff' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Staff</Link>
+                  <Link to='/admin/vendors' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Vendors</Link>
+                </>
+              )}
+              {role === 'vendor' && (
+                <>
+                  <Link to='/vendor/dashboard' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Orders</Link>
+                  <Link to='/vendor/menu' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>Menu</Link>
+                  <Link to='/vendor/history' className='px-4 py-2 text-sm text-white hover:bg-blue-500 rounded-lg transition-colors'>History</Link>
                 </>
               )}
             </div>

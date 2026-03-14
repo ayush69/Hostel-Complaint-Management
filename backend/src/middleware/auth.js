@@ -16,3 +16,8 @@ export const requireRole = (role) => (req,res,next)=>{
 	if (req.user && req.user.role === role) return next();
 	return res.status(403).json({message:'Forbidden - role required: '+role});
 };
+
+export const adminAuth = [authenticate, requireRole('admin')];
+export const staffAuth = [authenticate, requireRole('staff')];
+export const studentAuth = [authenticate, requireRole('student')];
+export const vendorAuth = [authenticate, requireRole('vendor')];

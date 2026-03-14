@@ -7,7 +7,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import Card from '../components/Card';
 
-export default function AdminLogin() {
+export default function VendorLogin() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const token = getToken();
@@ -17,10 +17,10 @@ export default function AdminLogin() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.post('/auth/admin/login', form);
+      const res = await api.post('/auth/vendor/login', form);
       setToken(res.data.token);
-      toast.success('Login successful!');
-      nav('/admin/dashboard');
+      toast.success('Welcome back!');
+      nav('/vendor/dashboard');
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Login failed');
     } finally {
@@ -31,16 +31,16 @@ export default function AdminLogin() {
   const switchAccount = () => { clearToken(); };
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50 flex items-center justify-center p-6'>
+    <div className='min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 flex items-center justify-center p-6'>
       <div className='w-full max-w-md'>
         <div className='text-center mb-8'>
-          <div className='inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl mb-4 shadow-lg'>
+          <div className='inline-flex items-center justify-center w-16 h-16 bg-orange-600 rounded-2xl mb-4 shadow-lg'>
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
           </div>
-          <h2 className='text-3xl font-bold text-gray-900 mb-2'>Admin Login</h2>
-          <p className='text-gray-600'>Access admin panel and management tools</p>
+          <h2 className='text-3xl font-bold text-gray-900 mb-2'>Vendor Login</h2>
+          <p className='text-gray-600'>Access your tiffin service dashboard</p>
         </div>
 
         {token && (
@@ -53,7 +53,7 @@ export default function AdminLogin() {
                 <p className='font-medium mb-1'>Already logged in</p>
                 <p>
                   Continue to your{' '}
-                  <Link to='/admin/dashboard' className='underline font-medium'>
+                  <Link to='/vendor/dashboard' className='underline font-medium'>
                     dashboard
                   </Link>
                   {' '}or{' '}
@@ -71,7 +71,7 @@ export default function AdminLogin() {
             <Input
               label="Email Address"
               type="email"
-              placeholder='Enter admin email'
+              placeholder='Enter vendor email'
               value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })}
               required
@@ -88,14 +88,14 @@ export default function AdminLogin() {
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
               </svg>
-              Login to Admin Panel
+              Login to Vendor Panel
             </Button>
           </form>
         </Card>
 
         <div className='mt-6 text-center'>
           <p className='text-gray-600 text-sm'>
-            For admin credentials, contact system administrator
+            For vendor account access, contact admin
           </p>
         </div>
       </div>
