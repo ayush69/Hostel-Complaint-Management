@@ -7,6 +7,9 @@ import StudentDashboard from './pages/StudentDashboard';
 import StudentRaise from './pages/StudentRaise';
 import StudentHistory from './pages/StudentHistory';
 import StudentFines from './pages/StudentFines';
+import StudentTiffin from './pages/StudentTiffin';
+import StudentTiffinSubscriptions from './pages/StudentTiffinSubscriptions';
+import StudentTiffinHistory from './pages/StudentTiffinHistory';
 import ComplaintDetails from './pages/ComplaintDetails';
 import StaffLogin from './pages/StaffLogin';
 import StaffDashboard from './pages/StaffDashboard';
@@ -21,6 +24,13 @@ import AdminStudentEdit from './pages/AdminStudentEdit';
 import AdminAssign from './pages/AdminAssign';
 import AdminComplaints from './pages/AdminComplaints';
 import AdminFines from './pages/AdminFines';
+import AdminVendors from './pages/AdminVendors';
+import AdminVendorCreate from './pages/AdminVendorCreate';
+import AdminVendorEdit from './pages/AdminVendorEdit';
+import VendorLogin from './pages/VendorLogin';
+import VendorDashboard from './pages/VendorDashboard';
+import VendorMenu from './pages/VendorMenu';
+import VendorOrderHistory from './pages/VendorOrderHistory';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicOnlyRoute from './components/PublicOnlyRoute';
@@ -33,6 +43,7 @@ export default function App(){ return (<div><Navbar /><div className='p-4'><Rout
 		<Route path='/student/login' element={<StudentLogin/>} />
 		<Route path='/staff/login' element={<StaffLogin/>} />
 		<Route path='/admin/login' element={<AdminLogin/>} />
+		<Route path='/vendor/login' element={<VendorLogin/>} />
 	</Route>
 
 	{/* student protected */}
@@ -42,6 +53,9 @@ export default function App(){ return (<div><Navbar /><div className='p-4'><Rout
 		<Route path='/student/history' element={<StudentHistory/>} />
 			<Route path='/complaints/:id' element={<ComplaintDetails/>} />
 		<Route path='/student/fines' element={<StudentFines/>} />
+		<Route path='/student/tiffin' element={<StudentTiffin/>} />
+		<Route path='/student/tiffin/subscriptions' element={<StudentTiffinSubscriptions/>} />
+		<Route path='/student/tiffin/history' element={<StudentTiffinHistory/>} />
 	</Route>
 
 	{/* staff protected */}
@@ -61,6 +75,16 @@ export default function App(){ return (<div><Navbar /><div className='p-4'><Rout
 		<Route path='/admin/staff' element={<AdminStaff/>} />
 		<Route path='/admin/staff/create' element={<AdminStaffCreate/>} />
 		<Route path='/admin/staff/:id/edit' element={<AdminStaffEdit/>} />
+		<Route path='/admin/vendors' element={<AdminVendors/>} />
+		<Route path='/admin/vendors/create' element={<AdminVendorCreate/>} />
+		<Route path='/admin/vendors/edit/:id' element={<AdminVendorEdit/>} />
+	</Route>
+
+	{/* vendor protected */}
+	<Route element={<ProtectedRoute role='vendor'/>}>
+		<Route path='/vendor/dashboard' element={<VendorDashboard/>} />
+		<Route path='/vendor/menu' element={<VendorMenu/>} />
+		<Route path='/vendor/history' element={<VendorOrderHistory/>} />
 	</Route>
 
 </Routes></div></div>); }
